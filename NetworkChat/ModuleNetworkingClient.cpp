@@ -5,13 +5,23 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 {
 	playerName = pplayerName;
 
+
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
+	socket = ::socket(AF_INET, SOCK_STREAM, 0);
+
 	// - Create the remote address object
+	struct sockaddr_in remoteAddr;
+	remoteAddr.sin_family = AF_INET; // IPv4
+	remoteAddr.sin_port = htons(serverPort); // Port
+	inet_pton(AF_INET, serverAddressStr, &remoteAddr.sin_addr);
+	
 	// - Connect to the remote address
+	connect(socket, (const sockaddr*)&remoteAddr, sizeof(remoteAddr));
+
 	// - Add the created socket to the managed list of sockets using addSocket()
-
-
+	addSocket(socket);
+	
 
 	// If everything was ok... change the state
 	state = ClientState::Start;

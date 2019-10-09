@@ -19,7 +19,15 @@ bool ModuleNetworkingServer::start(int port)
 	int res = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
 	if (res == SOCKET_ERROR)
 	{
-		//printWSErrorAndExit("Socket error");
+		wchar_t* error = NULL;
+		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, WSAGetLastError(),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR)&error, 0, NULL);
+
+		ELOG("Socket error: %s", error);
+
+		return false;
 	}
 
 	// - Bind the socket to a local interface
@@ -36,6 +44,8 @@ bool ModuleNetworkingServer::start(int port)
 
 
 	state = ServerState::Listening;
+
+	LOG("Server started");
 
 	return true;
 }
