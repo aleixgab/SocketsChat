@@ -42,7 +42,8 @@ bool ModuleNetworkingServer::gui()
 	if (state != ServerState::Stopped)
 	{
 		// NOTE(jesus): You can put ImGui code here for debugging purposes
-		ImGui::Begin("Server Window");
+		const ImU32 flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		ImGui::Begin("Server Window", nullptr, flags);
 
 		Texture *tex = App->modResources->server;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);

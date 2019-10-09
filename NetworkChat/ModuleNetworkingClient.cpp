@@ -37,7 +37,8 @@ bool ModuleNetworkingClient::gui()
 	if (state != ClientState::Stopped)
 	{
 		// NOTE(jesus): You can put ImGui code here for debugging purposes
-		ImGui::Begin("Client Window");
+		const ImU32 flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		ImGui::Begin("Client Window", nullptr, flags);
 
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);

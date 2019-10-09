@@ -11,7 +11,8 @@ void ScreenMainMenu::enable()
 
 void ScreenMainMenu::gui()
 {
-	ImGui::Begin("Main Menu");
+	const ImU32 flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	ImGui::Begin("Main Menu", nullptr, flags);
 	
 	Texture *banner = App->modResources->banner;
 	ImVec2 bannerSize(400.0f, 400.0f * banner->height / banner->width);
