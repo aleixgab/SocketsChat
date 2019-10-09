@@ -11,6 +11,8 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	// - Connect to the remote address
 	// - Add the created socket to the managed list of sockets using addSocket()
 
+
+
 	// If everything was ok... change the state
 	state = ClientState::Start;
 

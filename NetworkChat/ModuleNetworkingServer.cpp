@@ -10,11 +10,30 @@
 bool ModuleNetworkingServer::start(int port)
 {
 	// TODO(jesus): TCP listen socket stuff
+
 	// - Create the listenSocket
+	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
+
 	// - Set address reuse
+	int enable = 1;
+	int res = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
+	if (res == SOCKET_ERROR)
+	{
+		//printWSErrorAndExit("Socket error");
+	}
+
 	// - Bind the socket to a local interface
+	sockaddr_in bindAddr;
+	bindAddr.sin_family = AF_INET; // IPv4
+	bindAddr.sin_port = htons(port); // Port
+	bindAddr.sin_addr.S_un.S_addr = INADDR_ANY; // Any local IP address
+
 	// - Enter in listen mode
+	listen(s, 1);
+
 	// - Add the listenSocket to the managed list of sockets using addSocket()
+	addSocket(s);
+
 
 	state = ServerState::Listening;
 
