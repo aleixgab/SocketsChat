@@ -39,6 +39,11 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
+
+		if (send(socket, playerName.data(), strlen(playerName.data()) + 1, 0) < 1)
+		{
+			ELOG("Player %S could not send login message", playerName.data());
+		}
 	}
 
 	return true;
