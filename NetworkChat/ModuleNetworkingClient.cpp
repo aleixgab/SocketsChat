@@ -10,15 +10,27 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	// - Create the socket
 	socket = ::socket(AF_INET, SOCK_STREAM, 0);
 
+	//// Set non-blocking socket
+	//u_long nonBlocking = 1;
+	//int res = ioctlsocket(socket, FIONBIO, &nonBlocking);
+	//if (res == SOCKET_ERROR) {
+	//	ELOG("Socket error, exiting...");
+	//	return false;
+	//}
+
 	// - Create the remote address object
-	struct sockaddr_in remoteAddr;
+	sockaddr_in remoteAddr;
 	remoteAddr.sin_family = AF_INET; // IPv4
 	remoteAddr.sin_port = htons(serverPort); // Port
 	inet_pton(AF_INET, serverAddressStr, &remoteAddr.sin_addr);
 	
 	// - Connect to the remote address
-	connect(socket, (const sockaddr*)&remoteAddr, sizeof(remoteAddr));
-
+	int res = connect(socket, (const sockaddr*)&remoteAddr, sizeof(remoteAddr));
+	if (res != NO_ERROR)
+	{
+		ELOG("Error connecting to server");
+		return false;
+	}
 	// - Add the created socket to the managed list of sockets using addSocket()
 	addSocket(socket);
 	
@@ -39,11 +51,14 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
+		LOG("Sending name to server");
 
 		if (send(socket, playerName.data(), strlen(playerName.data()) + 1, 0) < 1)
 		{
-			ELOG("Player %S could not send login message", playerName.data());
+			ELOG("Player %ls could not send login message", playerName.data());
+			return false;
 		}
+		state = ClientState::Logging; 
 	}
 
 	return true;

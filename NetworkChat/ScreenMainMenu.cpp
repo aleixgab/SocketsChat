@@ -3,10 +3,10 @@
 
 void ScreenMainMenu::enable()
 {
-	LOG("Example Info log entry...");
-	DLOG("Example Debug log entry...");
-	WLOG("Example Warning log entry...");
-	ELOG("Example Error log entry...");
+	//LOG("Example Info log entry...");
+	//DLOG("Example Debug log entry...");
+	//WLOG("Example Warning log entry...");
+	//ELOG("Example Error log entry...");
 }
 
 void ScreenMainMenu::gui()

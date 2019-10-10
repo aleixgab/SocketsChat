@@ -12,11 +12,11 @@ bool ModuleNetworkingServer::start(int port)
 	// TODO(jesus): TCP listen socket stuff
 
 	// - Create the listenSocket
-	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
+	listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 
 	// - Set address reuse
 	int enable = 1;
-	int res = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
+	int res = setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
 	if (res == SOCKET_ERROR)
 	{
 		wchar_t* error = NULL;
@@ -36,11 +36,28 @@ bool ModuleNetworkingServer::start(int port)
 	bindAddr.sin_port = htons(port); // Port
 	bindAddr.sin_addr.S_un.S_addr = INADDR_ANY; // Any local IP address
 
+	res = bind(listenSocket, (const sockaddr*)&bindAddr, sizeof(bindAddr));
+	if (res != 0)
+	{
+		return false;
+	}
 	// - Enter in listen mode
-	listen(s, 1);
+	res = listen(listenSocket, 1);
+	if (res != 0)
+	{
+		wchar_t* error = NULL;
+		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, WSAGetLastError(),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR)&error, 0, NULL);
 
+		ELOG("Socket error: %s", error);
+
+		return false;
+	}
+	
 	// - Add the listenSocket to the managed list of sockets using addSocket()
-	addSocket(s);
+	addSocket(listenSocket);
 
 
 	state = ServerState::Listening;
