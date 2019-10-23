@@ -25,6 +25,9 @@
     <Filter Include="Source Files\stb">
       <UniqueIdentifier>{68164975-0231-4bd9-bedb-eea974904fc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\MemoryStream">
+      <UniqueIdentifier>{f632fca4-0be9-4040-8019-eb9c571b3c59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -110,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="ScreenGame.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryStream.cpp">
+      <Filter>Source Files\MemoryStream</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +208,15 @@
     </ClInclude>
     <ClInclude Include="ScreenGame.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteSwap.h">
+      <Filter>Source Files\MemoryStream</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryStream.h">
+      <Filter>Source Files\MemoryStream</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages.h">
+      <Filter>Source Files\MemoryStream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
