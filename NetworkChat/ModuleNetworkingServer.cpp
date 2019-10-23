@@ -104,19 +104,6 @@ bool ModuleNetworkingServer::gui()
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
 		}
 
-		if (ImGui::Button("MSG"))
-		{
-			for (auto& connectedSocket : connectedSockets)
-			{
-				OutputMemoryStream packet;
-				packet << ServerMessage::SendMsg;
-				packet << "User name already in use, please use other name";
-
-				SendPacket(packet, connectedSocket.socket);
-			}
-
-		}
-
 		ImGui::End();
 	}
 
@@ -153,12 +140,12 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		std::string playerName;
 		packet >> playerName;
 	
+		bool userNameInUse = false;
 	// Set the player name of the corresponding connected socket proxy
 		for (auto& connectedSocket : connectedSockets)
 		{
 			if (connectedSocket.socket == socket)
 			{
-				bool userNameInUse = false;
 				for (auto& connected : connectedSockets)
 				{
 					if (connected.playerName == playerName)
@@ -179,14 +166,29 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				if (!userNameInUse)
 				{
 					connectedSocket.playerName = playerName;
+					connectedSocket.isConnected = true;
 
 					OutputMemoryStream welcomePacket;
 					welcomePacket << ServerMessage::Welcome;
 					welcomePacket << "Welcome to the server";
-					
+
 					SendPacket(welcomePacket, socket);
+
+					for (auto& connected : connectedSockets)
+					{
+						std::string user = "***** ";
+						user += playerName;
+						user += " joined *****";
+
+						SendMsg(user.c_str(), 2u, connected.socket);
+					}
 				}
 			}
+		}
+
+		if (userNameInUse)
+		{
+			onSocketDisconnected(socket);
 		}
 	}
 
@@ -197,13 +199,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		for (auto& connected : connectedSockets)
 		{
 			if (connected.socket != socket)
-			{
-				OutputMemoryStream msgPacket;
-				msgPacket << ServerMessage::SendMsg;
-				msgPacket << text;
-
-				SendPacket(msgPacket, connected.socket);
-			}
+				SendMsg(text.c_str(), 0u, connected.socket);
 		}
 	}
 }
@@ -211,14 +207,24 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
 	// Remove the connected socket from the list
-	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+
+	std::vector<ConnectedSocket>::iterator disconectedSocket = connectedSockets.end();
+	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
 		auto &connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
-			connectedSockets.erase(it);
-			break;
+			disconectedSocket = it;
+		}
+		else if (connectedSockets.back().isConnected)
+		{
+			std::string text = "***** ";
+			text += connectedSocket.playerName;
+			text += " left *****";
+			SendMsg(text.c_str(), 3u, connectedSocket.socket);
 		}
 	}
+	if(disconectedSocket != connectedSockets.end())
+		connectedSockets.erase(disconectedSocket);
 }
 

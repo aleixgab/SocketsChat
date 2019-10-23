@@ -216,3 +216,14 @@ void ModuleNetworking::addSocket(SOCKET socket)
 {
 	sockets.push_back(socket);
 }
+
+
+void ModuleNetworking::SendMsg(const char* text, uint32 type, SOCKET socket)
+{
+	OutputMemoryStream stream;
+	stream << ServerMessage::SendMsg;
+	stream << text;
+	stream << type;
+
+	SendPacket(stream, socket);
+}

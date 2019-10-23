@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+#include <vector>
 
 class ModuleNetworkingClient : public ModuleNetworking
 {
@@ -57,6 +58,6 @@ private:
 
 	std::string playerName;
 
-	ImGuiTextBuffer textBuff;
+	std::vector<TextEntry> textVec;
 };
 

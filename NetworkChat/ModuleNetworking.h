@@ -37,6 +37,8 @@ protected:
 
 	void addSocket(SOCKET socket);
 
+	void SendMsg(const char* text, uint32 type, SOCKET socket);
+
 	void disconnect();
 
 	static void reportError(const char *message);

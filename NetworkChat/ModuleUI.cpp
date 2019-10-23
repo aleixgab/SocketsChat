@@ -42,10 +42,10 @@ bool ModuleUI::gui()
 	const ImU32 flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 	ImGui::Begin("Logging window", nullptr, flags);
 
-	uint32 logEntryCount = getLogEntryCount();
+	uint32 logEntryCount = getTextEntryCount();
 	for (uint32 entryIndex = 0; entryIndex < logEntryCount; ++entryIndex)
 	{
-		LogEntry entry = getLogEntry(entryIndex);
+		TextEntry entry = getTextEntry(entryIndex);
 		if (entry.type == LOG_TYPE_WARN) {
 			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.5f, 0.0f, 1.0f));
 		}

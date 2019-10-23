@@ -8,7 +8,7 @@ InputController Input = {};
 
 MouseController Mouse = {};
 
-std::vector<LogEntry> logLines;
+std::vector<TextEntry> logLines;
 
 void log(const char file[], int line, int type, const char* format, ...)
 {
@@ -38,18 +38,18 @@ void log(const char file[], int line, int type, const char* format, ...)
 	char *message = new char[strlen(tmp_string2)+1];
 	lstrcpyA(message, tmp_string2);
 
-	LogEntry entry;
+	TextEntry entry;
 	entry.type = type;
 	entry.message = message;
 	logLines.push_back(entry);
 }
 
-uint32 getLogEntryCount()
+uint32 getTextEntryCount()
 {
 	return (uint32)logLines.size();
 }
 
-LogEntry getLogEntry(uint32 logLineIndex)
+TextEntry getTextEntry(uint32 logLineIndex)
 {
 	ASSERT(logLineIndex < logLines.size());
 	return logLines[logLineIndex];

@@ -78,30 +78,61 @@ bool ModuleNetworkingClient::gui()
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		ImGui::Text("%s connected to the server...", playerName.c_str());
+		ImGui::Text("Hello %s: Welcome to the chat", playerName.c_str());
+		ImGui::SameLine();
+		if (ImGui::Button("Logout"))
+		{
+			disconnect();
+			onSocketDisconnected(socket);
+		}
 
 		if (state == ClientState::Connected)
 		{
 			ImGui::BeginChildFrame(1,ImVec2(400,425));
-			ImGui::TextWrapped(textBuff.begin());
+			for (uint32 i = 0u; i < textVec.size(); ++i)
+			{
+				TextEntry entry = textVec[i];
+				switch (entry.type)
+				{
+				case 1://Yellow text
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+					break;
+				case 2://Green text
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+					break;
+				case 3://Grey text
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+					break;
+				default:
+					break;
+				}
+				ImGui::TextWrapped("%s", entry.message);
+
+				if(entry.type > 0)
+					ImGui::PopStyleColor();
+			}
+
 			ImGui::EndChildFrame();
 
 			char inputText[128] = "";
 			if (ImGui::InputText("##inputText", inputText, 128, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				OutputMemoryStream packet;
-				packet << ClientMessage::SendMsg;
-				packet << inputText;
-
-				SendPacket(packet, socket);
+				SendMsg(inputText, 0u, socket);
 
 				std::string msg = inputText;
 				msg += "\n";
-				textBuff.appendf(inputText);
+
+				char* newMsg = new char[msg.length()];
+				lstrcpyA(newMsg, msg.c_str());
+
+				TextEntry text;
+				text.message = newMsg;
+				textVec.push_back(text);
 			}
 		}
 
 		ImGui::End();
+
 	}
 
 	return true;
@@ -115,18 +146,36 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	switch (serverMessage)
 	{
 	case ServerMessage::Welcome:
+	{
+		TextEntry text;
+		text.message = "*** You have joined the server *** \n";
+		text.type = 2u;
+
+		textVec.push_back(text);
+
 		state = ClientState::Connected;
 		break;
+	}
 	case ServerMessage::NoWelcome:
+		ELOG("User name already in use, please use other name");
 		state = ClientState::Stopped;
 		break;
 	case ServerMessage::SendMsg:
 	{
 		std::string msg;
+		uint32 type = 0u;
 		packet >> msg;
+		packet >> type;
 		msg += "\n";
-		textBuff.appendf(msg.c_str());
-		//LOG("%s", msg.c_str());
+
+		char* newMsg = new char[msg.length()];
+		lstrcpyA(newMsg, msg.c_str());
+
+		TextEntry text;
+		text.message = newMsg;
+		text.type = type;
+
+		textVec.push_back(text);
 	}
 		break;
 	default:

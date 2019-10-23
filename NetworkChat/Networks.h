@@ -156,12 +156,12 @@ enum { LOG_TYPE_INFO, LOG_TYPE_WARN, LOG_TYPE_ERROR, LOG_TYPE_DEBUG };
 #define ELOG(format, ...) log(__FILE__, __LINE__, LOG_TYPE_ERROR, format, __VA_ARGS__)
 #define DLOG(format, ...) log(__FILE__, __LINE__, LOG_TYPE_DEBUG, format, __VA_ARGS__)
 void log(const char file[], int line, int type, const char* format, ...);
-uint32 getLogEntryCount();
-struct LogEntry {
-	int type;
+uint32 getTextEntryCount();
+struct TextEntry {
+	int type = 0;
 	const char *message;
 };
-LogEntry getLogEntry(uint32 entryIndex);
+TextEntry getTextEntry(uint32 entryIndex);
 
 
 ////////////////////////////////////////////////////////////////////////
