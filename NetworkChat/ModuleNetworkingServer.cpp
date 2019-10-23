@@ -45,13 +45,7 @@ bool ModuleNetworkingServer::start(int port)
 	res = listen(listenSocket, 1);
 	if (res != 0)
 	{
-		wchar_t* error = NULL;
-		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, WSAGetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPWSTR)&error, 0, NULL);
-
-		ELOG("Socket error: %s", error);
+		reportError("Socket error: %s");
 
 		return false;
 	}
