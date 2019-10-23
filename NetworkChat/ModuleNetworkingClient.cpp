@@ -80,6 +80,27 @@ bool ModuleNetworkingClient::gui()
 
 		ImGui::Text("%s connected to the server...", playerName.c_str());
 
+		if (state == ClientState::Connected)
+		{
+			ImGui::BeginChildFrame(1,ImVec2(400,425));
+			ImGui::TextWrapped(textBuff.begin());
+			ImGui::EndChildFrame();
+
+			char inputText[128] = "";
+			if (ImGui::InputText("##inputText", inputText, 128, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				OutputMemoryStream packet;
+				packet << ClientMessage::SendMsg;
+				packet << inputText;
+
+				SendPacket(packet, socket);
+
+				std::string msg = inputText;
+				msg += "\n";
+				textBuff.appendf(inputText);
+			}
+		}
+
 		ImGui::End();
 	}
 
@@ -88,7 +109,29 @@ bool ModuleNetworkingClient::gui()
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
-	state = ClientState::Stopped;
+	ServerMessage serverMessage;
+	packet >> serverMessage;
+
+	switch (serverMessage)
+	{
+	case ServerMessage::Welcome:
+		state = ClientState::Connected;
+		break;
+	case ServerMessage::NoWelcome:
+		state = ClientState::Stopped;
+		break;
+	case ServerMessage::SendMsg:
+	{
+		std::string msg;
+		packet >> msg;
+		msg += "\n";
+		textBuff.appendf(msg.c_str());
+		//LOG("%s", msg.c_str());
+	}
+		break;
+	default:
+		break;
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)

@@ -46,7 +46,8 @@ private:
 	{
 		Stopped,
 		Start,
-		Logging
+		Logging,
+		Connected
 	};
 
 	ClientState state = ClientState::Stopped;
@@ -55,5 +56,7 @@ private:
 	SOCKET socket = INVALID_SOCKET;
 
 	std::string playerName;
+
+	ImGuiTextBuffer textBuff;
 };
 

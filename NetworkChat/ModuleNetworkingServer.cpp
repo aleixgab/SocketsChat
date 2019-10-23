@@ -104,6 +104,19 @@ bool ModuleNetworkingServer::gui()
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
 		}
 
+		if (ImGui::Button("MSG"))
+		{
+			for (auto& connectedSocket : connectedSockets)
+			{
+				OutputMemoryStream packet;
+				packet << ServerMessage::SendMsg;
+				packet << "User name already in use, please use other name";
+
+				SendPacket(packet, connectedSocket.socket);
+			}
+
+		}
+
 		ImGui::End();
 	}
 
@@ -150,11 +163,11 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				{
 					if (connected.playerName == playerName)
 					{
-						OutputMemoryStream packet;
-						packet << ServerMessage::NoWelcome;
-						packet << "User name already in use, please use other name";
+						OutputMemoryStream noWelcomePacket;
+						noWelcomePacket << ServerMessage::NoWelcome;
+						noWelcomePacket << "User name already in use, please use other name";
 
-						SendPacket(packet, socket);
+						SendPacket(noWelcomePacket, socket);
 
 
 						userNameInUse = true;
@@ -167,12 +180,29 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				{
 					connectedSocket.playerName = playerName;
 
-					OutputMemoryStream packet;
-					packet << ServerMessage::Welcome;
-					packet << "Welcome to the server";
-				
-					SendPacket(packet, socket);
+					OutputMemoryStream welcomePacket;
+					welcomePacket << ServerMessage::Welcome;
+					welcomePacket << "Welcome to the server";
+					
+					SendPacket(welcomePacket, socket);
 				}
+			}
+		}
+	}
+
+	else if (clientMessage == ClientMessage::SendMsg)
+	{
+		std::string text;
+		packet >> text;
+		for (auto& connected : connectedSockets)
+		{
+			if (connected.socket != socket)
+			{
+				OutputMemoryStream msgPacket;
+				msgPacket << ServerMessage::SendMsg;
+				msgPacket << text;
+
+				SendPacket(msgPacket, connected.socket);
 			}
 		}
 	}
