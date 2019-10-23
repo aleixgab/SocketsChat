@@ -145,7 +145,34 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		{
 			if (connectedSocket.socket == socket)
 			{
-				connectedSocket.playerName = playerName;
+				bool userNameInUse = false;
+				for (auto& connected : connectedSockets)
+				{
+					if (connected.playerName == playerName)
+					{
+						OutputMemoryStream packet;
+						packet << ServerMessage::NoWelcome;
+						packet << "User name already in use, please use other name";
+
+						SendPacket(packet, socket);
+
+
+						userNameInUse = true;
+						break;
+					}
+
+				}
+				
+				if (!userNameInUse)
+				{
+					connectedSocket.playerName = playerName;
+
+					OutputMemoryStream packet;
+					packet << ServerMessage::Welcome;
+					packet << "Welcome to the server";
+				
+					SendPacket(packet, socket);
+				}
 			}
 		}
 	}
