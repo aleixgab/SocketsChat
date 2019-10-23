@@ -24,6 +24,17 @@ void ModuleNetworking::reportError(const char* inOperationDesc)
 	ELOG("Error %s: %d- %s", inOperationDesc, errorNum, lpMsgBuf);
 }
 
+bool ModuleNetworking::SendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR)
+	{
+		reportError("Send");
+		return false;
+	}
+	return true;
+}
+
 void ModuleNetworking::disconnect()
 {
 	for (SOCKET socket : sockets)
@@ -118,8 +129,8 @@ bool ModuleNetworking::preUpdate()
 		// subclass (use the callback onSocketReceivedData()).
 		else
 		{
-
-			int recvSize = recv(curr, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+			InputMemoryStream packet;
+			int recvSize = recv(curr, packet.GetBufferPtr(), packet.GetCapacity(), 0);
 			if (recvSize == SOCKET_ERROR)
 			{
 				int lastError = WSAGetLastError();
@@ -169,7 +180,8 @@ bool ModuleNetworking::preUpdate()
 			else // Success
 			{
 				// Process received data
-				onSocketReceivedData(curr, incomingDataBuffer);
+				packet.SetSize((uint32)recvSize);
+				onSocketReceivedData(curr, packet);
 
 			}
 

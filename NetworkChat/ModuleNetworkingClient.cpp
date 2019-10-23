@@ -50,15 +50,17 @@ bool ModuleNetworkingClient::update()
 {
 	if (state == ClientState::Start)
 	{
-		// TODO(jesus): Send the player name to the server
-		LOG("Sending name to server");
+		OutputMemoryStream packet;
+		packet << ClientMessage::Hello;
+		packet << playerName;
 
-		if (send(socket, playerName.data(), strlen(playerName.data()) + 1, 0) < 1)
+		if (SendPacket(packet, socket))
+			state = ClientState::Logging;
+		else
 		{
-			ELOG("Player %ls could not send login message", playerName.data());
-			return false;
+			disconnect();
+			state = ClientState::Stopped;
 		}
-		state = ClientState::Logging; 
 	}
 
 	return true;
