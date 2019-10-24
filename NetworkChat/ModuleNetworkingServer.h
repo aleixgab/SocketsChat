@@ -62,6 +62,7 @@ private:
 		SOCKET socket;
 		std::string playerName;
 		bool isConnected = false;
+		bool isAdmin = true;
 	};
 
 	std::vector<ConnectedSocket> connectedSockets;
