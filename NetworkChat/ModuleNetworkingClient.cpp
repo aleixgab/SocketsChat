@@ -121,7 +121,8 @@ bool ModuleNetworkingClient::gui()
 
 
 
-				std::string msg = inputText;
+				std::string msg = "You: ";
+				msg.append(inputText);
 				msg += "\n";
 				if (msg.at(0) != '/')
 				{

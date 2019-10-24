@@ -288,13 +288,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 							std::string finalMsg = msgText;
 							ConnectedSocket socketSender;
 							if (GetConnectedSocket(socket, socketSender))
-							{
-								finalMsg = socketSender.playerName;
-								finalMsg += " whisper to ";
-								finalMsg += connected.playerName;
-								finalMsg += " : ";
-								finalMsg += msgText;
-							}
+								finalMsg = socketSender.playerName + " whisper to " + connected.playerName + " : " + msgText;
 
 							SendMsg(finalMsg.c_str(), 0u, connected.socket);
 							SendMsg(finalMsg.c_str(), 0u, socket);
@@ -314,10 +308,15 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			else
 			{
-				for (auto& connected : connectedSockets)
+				ConnectedSocket socketSender;
+				if (GetConnectedSocket(socket, socketSender))
 				{
-					if (connected.socket != socket)
-						SendMsg(text.c_str(), 0u, connected.socket);
+					std::string completedText = socketSender.playerName + ": " + text;
+					for (auto& connected : connectedSockets)
+					{
+						if (connected.socket != socket)
+							SendMsg(completedText.c_str(), 0u, connected.socket);
+					}
 				}
 			}
 		}
