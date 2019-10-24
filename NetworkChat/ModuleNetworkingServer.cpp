@@ -290,7 +290,30 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 				else if (command.compare("whisper") == 0)
 				{
+					std::string msgText = text.substr(text.find(" ") + 1);
+					std::string user = msgText.substr(0, msgText.find(" "));
+					msgText = msgText.substr(user.size() + 1);
 
+					
+					bool sendMsg = false;
+					for (auto& connected : connectedSockets)
+					{
+						if (connected.playerName == user)
+						{
+							std::string finalMsg = msgText;
+							ConnectedSocket socketSender;
+							if (GetConnectedSocket(socket, socketSender))
+								finalMsg = socketSender.playerName + " whisper to " + connected.playerName + " : " + msgText;
+
+							SendMsg(finalMsg.c_str(), 0u, connected.socket);
+							SendMsg(finalMsg.c_str(), 0u, socket);
+							sendMsg = true;
+							break;
+
+						}
+					}
+					if (!sendMsg)
+						SendMsg("Wrong username", 1u, socket);
 				}
 
 				else if (command.compare("change_name") == 0)
@@ -358,10 +381,15 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			else
 			{
-				for (auto& connected : connectedSockets)
+				ConnectedSocket socketSender;
+				if (GetConnectedSocket(socket, socketSender))
 				{
-					if (connected.socket != socket)
-						SendMsg(text.c_str(), 0u, connected.socket);
+					std::string completedText = socketSender.playerName + ": " + text;
+					for (auto& connected : connectedSockets)
+					{
+						if (connected.socket != socket)
+							SendMsg(completedText.c_str(), 0u, connected.socket);
+					}
 				}
 			}
 		}
@@ -371,7 +399,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
 	// Remove the connected socket from the list
-
+	ConnectedSocket leftSocket;
+	GetConnectedSocket(socket, leftSocket);
 	std::vector<ConnectedSocket>::iterator disconectedSocket = connectedSockets.end();
 	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
@@ -383,7 +412,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 		else if (connectedSockets.back().isConnected)
 		{
 			std::string text = "***** ";
-			text += connectedSocket.playerName;
+			text += leftSocket.playerName;
 			text += " left *****";
 			SendMsg(text.c_str(), 4u, connectedSocket.socket);
 		}
