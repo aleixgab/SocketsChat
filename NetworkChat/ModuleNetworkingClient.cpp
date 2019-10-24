@@ -119,15 +119,19 @@ bool ModuleNetworkingClient::gui()
 			{
 				SendMsg(inputText, 0u, socket);
 
+
+
 				std::string msg = inputText;
 				msg += "\n";
+				if (msg.at(0) != '/')
+				{
+					char* newMsg = new char[msg.length()];
+					lstrcpyA(newMsg, msg.c_str());
 
-				char* newMsg = new char[msg.length()];
-				lstrcpyA(newMsg, msg.c_str());
-
-				TextEntry text;
-				text.message = newMsg;
-				textVec.push_back(text);
+					TextEntry text;
+					text.message = newMsg;
+					textVec.push_back(text);
+				}
 			}
 		}
 

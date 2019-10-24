@@ -62,7 +62,13 @@ private:
 		SOCKET socket;
 		std::string playerName;
 		bool isConnected = false;
+
+
 	};
+
+	bool GetConnectedSocket(SOCKET socket, ConnectedSocket& connected);
+
+	bool GetConnectedSocket(std::string name, ConnectedSocket& connected);
 
 	std::vector<ConnectedSocket> connectedSockets;
 };

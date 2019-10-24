@@ -11,8 +11,8 @@ enum class ClientMessage
 
 enum class ServerMessage
 {
-	Welcome,
-	NoWelcome,
+	NoWelcome = -1,
+	Welcome = 0,
 	SendMsg
 };
 

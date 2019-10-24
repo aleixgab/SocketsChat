@@ -139,9 +139,9 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		std::string playerName;
 		packet >> playerName;
-	
+
 		bool userNameInUse = false;
-	// Set the player name of the corresponding connected socket proxy
+		// Set the player name of the corresponding connected socket proxy
 		for (auto& connectedSocket : connectedSockets)
 		{
 			if (connectedSocket.socket == socket)
@@ -162,7 +162,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					}
 
 				}
-				
+
 				if (!userNameInUse)
 				{
 					connectedSocket.playerName = playerName;
@@ -196,10 +196,65 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		std::string text;
 		packet >> text;
-		for (auto& connected : connectedSockets)
+
+		if (text.length() > 0)
 		{
-			if (connected.socket != socket)
-				SendMsg(text.c_str(), 0u, connected.socket);
+			char fLetter = text.at(0);
+
+			if (fLetter == '/')
+			{
+				//text.erase(0, 1);
+
+				std::string command = text.substr(1, text.find(" "));
+
+				if (command.compare("help") == 0)
+				{
+					SendMsg("***** Commands list *****\n\t/help\n\t/kick [username]\n\t/list\n\t/whisper [username] [message]", 1u, socket);
+				}
+				else if (command.compare("list") == 0)
+				{
+					std::string userList = "***** Users List *****\n";
+
+					for (auto& connected : connectedSockets)
+					{
+						userList += connected.playerName;
+						userList += "\n\t";
+					}
+
+					SendMsg(userList.c_str(), 1u, socket);
+
+				}
+				else if (command.compare("kick") == 0)
+				{
+					///
+					bool admin = false;
+					ConnectedSocket connected;
+					if (GetConnectedSocket(socket, connected))
+					{
+						if (admin)
+						{
+							//if (GetConnectedSocket())
+						}
+					}
+				}
+				else if (command.compare("whisper") == 0)
+				{
+
+				}
+				else if (command.compare("change_name") == 0)
+				{
+
+				}
+			}
+
+			else
+			{
+				for (auto& connected : connectedSockets)
+				{
+					if (connected.socket != socket)
+						SendMsg(text.c_str(), 0u, connected.socket);
+				}
+			}
 		}
 	}
 }
@@ -226,5 +281,32 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 	}
 	if(disconectedSocket != connectedSockets.end())
 		connectedSockets.erase(disconectedSocket);
+}
+
+bool ModuleNetworkingServer::GetConnectedSocket(SOCKET socket, ConnectedSocket& connected)
+{
+	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+	{
+		if ((*it).socket == socket)
+		{
+			connected = *it;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool ModuleNetworkingServer::GetConnectedSocket(std::string name, ConnectedSocket& connected)
+{
+	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+	{
+		if ((*it).playerName.compare(name) == 0)
+		{
+			connected = *it;
+			return true;
+		}
+	}
+	return false;
 }
 
