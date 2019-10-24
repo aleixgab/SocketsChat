@@ -277,14 +277,13 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 									SendPacket(stream, toKick.socket);
 								}
+								else
+									SendMsg("You can not kick an Admin ", 3u, socket);
 							}
 						}
 					
 						else
-						{
 							SendMsg("You are not Admin, get permission from the Server or an Admin ", 3u, socket);
-
-						}
 					}
 				}
 
