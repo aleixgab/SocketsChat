@@ -91,7 +91,7 @@ bool ModuleNetworkingServer::gui()
 
 		ImGui::Text("List of connected sockets:");
 
-		for (auto &connectedSocket : connectedSockets)
+		for (auto& connectedSocket : connectedSockets)
 		{
 			ImGui::Separator();
 			ImGui::Text("Socket ID: %d", connectedSocket.socket);
@@ -101,8 +101,23 @@ bool ModuleNetworkingServer::gui()
 				connectedSocket.address.sin_addr.S_un.S_un_b.s_b3,
 				connectedSocket.address.sin_addr.S_un.S_un_b.s_b4,
 				ntohs(connectedSocket.address.sin_port));
+
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, connectedSocket.isAdmin ? ImVec4(0.0, 0.7, 0.0, 1.0) : ImVec4(0.8, 0.0, 0.0, 1.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, connectedSocket.isAdmin ? ImVec4(0.0, 0.55, 0.0, 1.0) : ImVec4(0.6, 0.0, 0.0, 1.0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, connectedSocket.isAdmin ? ImVec4(0.0, 0.4, 0.0, 1.0) : ImVec4(0.4, 0.0, 0.0, 1.0));
+			if (ImGui::Button("Admin"))
+			{
+				connectedSocket.isAdmin = !connectedSocket.isAdmin;
+			}
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
+
 		}
+
 
 		ImGui::End();
 	}

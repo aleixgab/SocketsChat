@@ -62,8 +62,7 @@ private:
 		SOCKET socket;
 		std::string playerName;
 		bool isConnected = false;
-
-
+		bool isAdmin = true;
 	};
 
 	bool GetConnectedSocket(SOCKET socket, ConnectedSocket& connected);
