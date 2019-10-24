@@ -38,6 +38,8 @@ private:
 
 	void onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet) override;
 
+	void SetNewAdmin(std::string& newAdmin);
+
 	void onSocketDisconnected(SOCKET socket) override;
 
 
@@ -62,7 +64,7 @@ private:
 		SOCKET socket;
 		std::string playerName;
 		bool isConnected = false;
-		bool isAdmin = true;
+		bool isAdmin = false;
 	};
 
 	bool GetConnectedSocket(SOCKET socket, ConnectedSocket& connected);

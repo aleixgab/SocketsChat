@@ -103,6 +103,9 @@ bool ModuleNetworkingClient::gui()
 				case 3://Grey text
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
 					break;
+				case 4://Red text
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+					break;
 				default:
 					break;
 				}
@@ -146,6 +149,8 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 {
 	ServerMessage serverMessage;
 	packet >> serverMessage;
+
+	LOG("New data received, type %i", serverMessage);
 
 	switch (serverMessage)
 	{
@@ -192,6 +197,19 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		LOG(msg.c_str());
 	}
 		break;
+	case ServerMessage::NameChange:
+	{
+		std::string name;
+		packet >> name;
+		playerName = name;
+
+		TextEntry text;
+		text.message = "Name changed succesfully\n";
+		text.type = 3u;
+
+		textVec.push_back(text);
+	}
+	break;
 	default:
 		break;
 	}

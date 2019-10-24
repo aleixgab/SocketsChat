@@ -14,6 +14,7 @@ enum class ServerMessage
 	NoWelcome = -1,
 	Welcome = 0,
 	SendMsg,
-	LogOut
+	LogOut,
+	NameChange
 };
 

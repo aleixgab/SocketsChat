@@ -110,6 +110,9 @@ bool ModuleNetworkingServer::gui()
 			if (ImGui::Button(admin.c_str()))
 			{
 				connectedSocket.isAdmin = !connectedSocket.isAdmin;
+
+				SendMsg(connectedSocket.isAdmin == true ? "You are Admin now!" : "You are no longer Admin", connectedSocket.isAdmin == true ? 2 : 4, connectedSocket.socket);
+
 			}
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
@@ -232,12 +235,13 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			{
 				//text.erase(0, 1);
 
-				std::string command = text.substr(1, text.find(" "));
+				std::string command = text.substr(1, text.find(" ") - 1);
 
 				if (command.compare("help") == 0)
 				{
 					SendMsg("***** Commands list *****\n\t/help\n\t/kick [username]\n\t/list\n\t/whisper [username] [message]", 1u, socket);
 				}
+
 				else if (command.compare("list") == 0)
 				{
 					std::string userList = "***** Users List *****\n";
@@ -251,6 +255,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					SendMsg(userList.c_str(), 1u, socket);
 
 				}
+
 				else if (command.compare("kick") == 0)
 				{
 					ConnectedSocket connected;
@@ -258,8 +263,11 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					{
 						if (connected.isAdmin)
 						{
+							std::string kickName = text.substr(text.find(" "), text.size() - 1);
+							kickName = kickName.substr(1, kickName.find(" ") - 1);
+
 							ConnectedSocket toKick;
-							if (GetConnectedSocket(connected.playerName, toKick))
+							if (GetConnectedSocket(kickName, toKick))
 							{
 								if (!toKick.isAdmin)
 								{
@@ -267,18 +275,83 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 									stream << ServerMessage::LogOut;
 									stream << "You have been kicked out the server by " + connected.playerName;
 
-									SendPacket(stream, socket);
+									SendPacket(stream, toKick.socket);
 								}
 							}
 						}
+					
+						else
+						{
+							SendMsg("You are not Admin, get permission from the Server or an Admin ", 3u, socket);
+
+						}
 					}
 				}
+
 				else if (command.compare("whisper") == 0)
 				{
 
 				}
+
 				else if (command.compare("change_name") == 0)
 				{
+					ConnectedSocket connected;
+					if (GetConnectedSocket(socket, connected))
+					{
+						if (text.find(" ") != std::string::npos)
+						{
+							std::string newName = text.substr(text.find(" "), text.size() - 1);
+							newName = newName.substr(1, newName.find(" ") - 1);
+
+							bool canChange = true;
+							for (auto& connected : connectedSockets)
+							{
+								if (connected.playerName == newName)
+								{
+									SendMsg("Name already in use", 4u, socket);
+									canChange = false;
+									break;
+								}
+							}
+
+							if (canChange)
+								for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+								{
+									if ((*it).socket == socket)
+									{
+										(*it).playerName = newName;
+
+										OutputMemoryStream stream;
+										stream << ServerMessage::NameChange;
+										stream << newName;
+										SendPacket(stream, socket);
+									}
+								}
+						}
+						else SendMsg("Write your new name, see /help", 3u, socket);
+					}
+				}
+
+				else if (command.compare("admin") == 0)
+				{
+					ConnectedSocket connected;
+					if (GetConnectedSocket(socket, connected))
+					{
+						if (connected.isAdmin)
+						{
+							std::string newAdmin = text.substr(text.find(" "), text.size() - 1);
+							newAdmin = newAdmin.substr(1, newAdmin.find(" ") - 1);
+
+							SetNewAdmin(newAdmin);
+
+
+						}
+					}
+				}
+
+				else
+				{
+					SendMsg("Unknown command, try /help to get all commands", 3u, socket);
 
 				}
 			}
@@ -312,7 +385,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 			std::string text = "***** ";
 			text += connectedSocket.playerName;
 			text += " left *****";
-			SendMsg(text.c_str(), 3u, connectedSocket.socket);
+			SendMsg(text.c_str(), 4u, connectedSocket.socket);
 		}
 	}
 	if(disconectedSocket != connectedSockets.end())
@@ -346,3 +419,15 @@ bool ModuleNetworkingServer::GetConnectedSocket(std::string name, ConnectedSocke
 	return false;
 }
 
+void ModuleNetworkingServer::SetNewAdmin(std::string& newAdmin)
+{
+	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+	{
+		if ((*it).playerName.compare(newAdmin) == 0)
+		{
+			(*it).isAdmin = true;
+
+			SendMsg("You are Admin now!", 2, (*it).socket);
+		}
+	}
+}
