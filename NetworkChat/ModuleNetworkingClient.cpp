@@ -124,11 +124,12 @@ bool ModuleNetworkingClient::gui()
 
 
 
-				std::string msg = "You: ";
-				msg.append(inputText);
-				msg += "\n";
-				if (msg.at(0) != '/')
+				if (inputText[0] != '/')
 				{
+					std::string msg = "You: ";
+					msg.append(inputText);
+					msg += "\n";
+
 					char* newMsg = new char[msg.length()];
 					lstrcpyA(newMsg, msg.c_str());
 
