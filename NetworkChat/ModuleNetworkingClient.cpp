@@ -182,6 +182,16 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		textVec.push_back(text);
 	}
 		break;
+	case ServerMessage::LogOut:
+	{
+		disconnect();
+		onSocketDisconnected(socket);
+
+		std::string msg;
+		packet >> msg;
+		LOG(msg.c_str());
+	}
+		break;
 	default:
 		break;
 	}

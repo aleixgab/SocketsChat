@@ -106,13 +106,25 @@ bool ModuleNetworkingServer::gui()
 			ImGui::PushStyleColor(ImGuiCol_Button, connectedSocket.isAdmin ? ImVec4(0.0, 0.7, 0.0, 1.0) : ImVec4(0.8, 0.0, 0.0, 1.0));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, connectedSocket.isAdmin ? ImVec4(0.0, 0.55, 0.0, 1.0) : ImVec4(0.6, 0.0, 0.0, 1.0));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, connectedSocket.isAdmin ? ImVec4(0.0, 0.4, 0.0, 1.0) : ImVec4(0.4, 0.0, 0.0, 1.0));
-			if (ImGui::Button("Admin"))
+			std::string admin = "Admin##" + connectedSocket.playerName;
+			if (ImGui::Button(admin.c_str()))
 			{
 				connectedSocket.isAdmin = !connectedSocket.isAdmin;
 			}
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
+
+			ImGui::SameLine();
+			std::string kick = "Kick##" + connectedSocket.playerName;
+			if (ImGui::Button(kick.c_str()))
+			{
+					OutputMemoryStream stream;
+					stream << ServerMessage::LogOut;
+					stream << "You have been kicked out the server by the server";
+
+					SendPacket(stream, connectedSocket.socket);
+			}
 
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
 
@@ -241,14 +253,23 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				}
 				else if (command.compare("kick") == 0)
 				{
-					///
-					bool admin = false;
 					ConnectedSocket connected;
 					if (GetConnectedSocket(socket, connected))
 					{
-						if (admin)
+						if (connected.isAdmin)
 						{
-							//if (GetConnectedSocket())
+							ConnectedSocket toKick;
+							if (GetConnectedSocket(connected.playerName, toKick))
+							{
+								if (!toKick.isAdmin)
+								{
+									OutputMemoryStream stream;
+									stream << ServerMessage::LogOut;
+									stream << "You have been kicked out the server by " + connected.playerName;
+
+									SendPacket(stream, socket);
+								}
+							}
 						}
 					}
 				}
