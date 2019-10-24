@@ -313,7 +313,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 						}
 					}
 					if (!sendMsg)
-						SendMsg("Wrong username", 1u, socket);
+						SendMsg("Wrong username", 3u, socket);
 				}
 
 				else if (command.compare("change_name") == 0)
