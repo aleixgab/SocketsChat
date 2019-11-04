@@ -239,7 +239,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 				if (command.compare("help") == 0)
 				{
-					SendMsg("***** Commands list *****\n\t/help\n\t/kick [username]\n\t/list\n\t/whisper [username] [message]", 1u, socket);
+					SendMsg("***** Commands list *****\n\t/help\n\t/kick [username]\n\t/list\n\t/whisper [username] [message]\n\t/change_name [new username]\n\t/admin [username]", 1u, socket);
 				}
 
 				else if (command.compare("list") == 0)
